@@ -1,0 +1,16 @@
+Buenos dias,
+
+Mi equipo es un MacBook Air con chipset M1, al instalar microk8s en el equipo descubrí que este modelo no es compatible con microk8s.
+
+Al intentar instalar microk8s para mac a través de brew como indica en la guía oficial https://ubuntu.com/tutorials/install-microk8s-on-mac-os#1-overview, al finalizar la instalación del multipass e intentar arrancar microk8s, da el siguiente error.
+
+An error occurred with the instance when trying to start with 'multipass': returned exit code 2. Ensure that 'multipass' is setup correctly and try again.
+
+Buscando un poco por internet llego a este hilo de stack overflow "https://stackoverflow.com/questions/65864009/running-kubernetes-locally-on-m1-mac" donde recomiendan utilizar "Kind" para procesadores M1 de apple. Como no es la solución recomendada en el curso, opto por instalar una maquina virtual en un esxi local de pruebas e instalar microk8s en ubuntu como indica la guía "https://ubuntu.com/tutorials/install-a-local-kubernetes-with-microk8s#1-overview".
+
+Al hacer el ejercicio en una maquina virtual, al realizar la conexión para comprobar el dashboard, no se muestra en la máquina desde la cual estoy accediendo a microk8s por ssh. Opto por hacer un curl para comprobar que el dashboard esta iniciado correctamente, quizas se pueda cambiar el tipo de conexión por NodePort o conectarme desde mi maquina local al cluster microk8s que esta en la VM. Pero no esta descrito en el curso y tampoco quiero salirme del guión.
+
+No se si podriaís ayudarme.
+
+Un Saludo.
+

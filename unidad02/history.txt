@@ -1,0 +1,91 @@
+    1  ping www.google.com
+    2  iclear
+    3  ping www.google.com
+    4  ping 8.8.8.8
+    5  ip a
+    6  clear
+    7  ifconfig
+    8  ip a
+    9  apt-get install openssh
+   10  sudo apt-get install openssh-server
+   11  ping 192.168.1.1.
+   12  ping 192.168.1.1
+   13  ls /etc/netplan/
+   14  vim /etc/netplan/00-installer-config.yaml 
+   15  sudo vim /etc/netplan/00-installer-config.yaml 
+   16  systemctl restart network
+   17  sudo systemctl restart network
+   18  reboot
+   19  ping www.google.com
+   20  ip a
+   21  ifup ens160
+   22  ping 8.8.8.8
+   23  traceroute 192.168.1.1
+   24  ping 192.168.1.1
+   25  clear
+   26  ls
+   27  sudo apt-get install git
+   28  git clone https://github.com/go-elevate/k8s4arch-practice.git
+   29  ls
+   30  cd k8s4arch-practice/
+   31  ls
+   32  git status
+   33  git branch igarcia
+   34  git branch
+   35  git checkout igarcia
+   36  git status
+   37  cd ..
+   38  ls
+   39  cd..
+   40  exit
+   41  clear
+   42  vim .bashrc 
+   43  reset
+   44  kubectl get pods --all-namespaces
+   45  kubectl
+   46  alias
+   47  exit
+   48  kubectl get pods --all-namespaces
+   49  exit
+   50  clear
+   51  exit
+   52  clear
+   53  ps -ef
+   54  kubectl get pods --all-namespaces
+   55  kubectl get ns
+   56  kubectl get nodes 
+   57  eit
+   58  exit
+   59  microk8s enable dns dashboard storage
+   60  microk8s status
+   61  kubectl get --all-namespaces
+   62  microk8s kubectl get --all-namespaces
+   63  microk8s kubectl get all --all-namespaces
+   64  microk8s kubectl get pods 
+   65  microk8s kubectl get pods --all-namespaces
+   66  sudo snap install micro8ks --classic
+   67  sudo snap install microk8s --classic
+   68  sudo ufw allow in on cni0 && sudo ufw allow out on cni0
+   69  sudo ufw default allow routed
+   70  microk8s enable dns dashboard storage
+   71  sudo usermod -a -G microk8s selketh
+   72  sudo chown -f -R selketh ~/.kube
+   73  microk8s enable dns dashboard storage
+   74  newgrp microk8s
+   75  exit
+   76  curl localhost:8001
+   77  curl http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/ > /home/selketh/k8s4arch-practice/unidad02/dashboard.txt
+   78  cat /home/selketh/k8s4arch-practice/unidad02/dashboard.txt 
+   79  kubectl get pods -o wide > /home/selketh/k8s4arch-practice/unidad02/estado.txt
+   80  cat /home/selketh/k8s4arch-practice/unidad02/estado.txt
+   81  exit
+   82  move /home/selketh/k8s4arch-practice/unidad01/nodes.txt /home/selketh/k8s4arch-practice/unidad02/ 
+   83  mv /home/selketh/k8s4arch-practice/unidad01/nodes.txt /home/selketh/k8s4arch-practice/unidad02/ 
+   84  cd /home/selketh/k8s4arch-practice/unidad02/
+   85  ls
+   86  cat dashboard.txt 
+   87  cat nodes.txt 
+   88  cat estado
+   89  cat estado.txt 
+   90  history
+   91  history > history.txt

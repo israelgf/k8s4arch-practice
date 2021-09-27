@@ -1,0 +1,2 @@
+NAME    READY   STATUS    RESTARTS   AGE   IP             NODE       NOMINATED NODE   READINESS GATES
+nginx   1/1     Running   0          13m   10.1.128.205   microk8s   <none>           <none>

@@ -38,9 +38,18 @@ spec:
         type: backend
     spec:
       containers:
-      - name: hoteles-container
+      - name: hoteles-container-frontend
+        image: ghcr.io/go-elevate/k8s4arch-hotels-frontend:slim
+        imagePullPolicy: Always
+        envFrom: 
+        - configMapRef:
+           name: app-config
+      - name: hoteles-container-backend
         image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
-        imagePullPolicy: Always 
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: bbdd
+          mountPath: /db/
         resources:
           requests:
             memory: 1024Mi
@@ -66,4 +75,19 @@ spec:
           periodSeconds: 10
         envFrom:
         - configMapRef:
+           name: app-config      
+      initContainers:
+      - name: hoteles-container-init
+        image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        volumeMounts:
+        - name: bbdd
+          mountPath: /db/
+        imagePullPolicy: Always
+        command: ["python"]
+        args: ["migrations.py"]
+        envFrom:
+        - configMapRef:
            name: app-config
+      volumes:
+      - name: bbdd
+        emptyDir: {}

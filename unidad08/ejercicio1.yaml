@@ -1,0 +1,259 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hotels
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /mnt/nfs
+    server: 192.168.1.122
+    readOnly: false
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+  namespace: hotels
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+     requests:
+       storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: hotels
+data:
+  DB_PATH: /db/hotels.json
+  DB_TABLE: hotels
+  HOTELS_API_HOST: "http://api.internal.itrip.io"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotels-backend
+  namespace: hotels
+  labels:
+    app: hotels
+    tier: backend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: hotels
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app : hotels
+        tier: backend
+    spec:
+      containers:
+      - name: hoteles-container-backend
+        image: ghcr.io/go-elevate/k8s4arch-hotels-backend:stable
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: bbdd
+          mountPath: /db/
+        resources:
+          requests:
+            memory: 1024Mi
+            cpu: 500m
+          limits:
+            memory: 2048Mi
+            cpu: 1
+        ports:
+        - containerPort: 5000
+        livenessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 1
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 5000
+          failureThreshold: 30
+          periodSeconds: 10
+        envFrom:
+        - configMapRef:
+           name: app-config      
+      initContainers:
+      - name: hoteles-container-init
+        image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        volumeMounts:
+        - name: bbdd
+          mountPath: /db/
+        imagePullPolicy: Always
+        command: ["python"]
+        args: ["migrations.py"]
+        envFrom:
+        - configMapRef:
+           name: app-config
+      volumes:
+      - name: bbdd
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotels-frontend
+  namespace: hotels
+  labels:
+    app: hotels
+    tier: frontend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: hotels
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app : hotels
+        tier: frontend
+    spec:
+      containers:
+      - name: hoteles-container-frontend
+        image: ghcr.io/go-elevate/k8s4arch-hotels-frontend:stable
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 80
+        envFrom: 
+        - configMapRef:
+           name: app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotels-frontend
+  namespace: hotels
+spec:
+  type: ClusterIP
+  selector:
+    app: hotels
+    tier: frontend
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotels-backend
+  namespace: hotels
+spec:
+  type: ClusterIP
+  selector:
+    app: hotels
+    tier: backend
+  ports:
+    - protocol: TCP
+      name: http
+      port: 80
+      targetPort: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-front-hotels
+  namespace: hotels
+  annotations:
+     kubernetes.io/ingress.class: public
+spec:
+  rules:
+  - host: awesome-hotels.internal.itrip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: hotels-frontend
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-back-hotels
+  namespace: hotels
+  annotations:
+     kubernetes.io/ingress.class: public
+spec:
+  rules:
+  - host: api.internal.itrip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: hotels-backend
+            port:
+              number: 80
+        path: /hotels
+        pathType: Exact
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hotels-backend-allow-frontend
+  namespace: hotels
+spec:
+  podSelector:
+    matchLabels:
+      app: hotels
+      tier: backend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: hotels
+          tier: frontend
+    ports:
+    - protocol: TCP
+      port: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hotels-backend-deny-egress
+  namespace: hotels
+spec:
+  podSelector:
+    matchLabels:
+      app: hotels
+      tier: backend
+  policyTypes:
+  - Egress
